@@ -1,23 +1,27 @@
-import faiss
-import numpy as np
+from langchain_text_splitters import RecursiveCharacterTextSplitter
+
+from langchain_community.vectorstores import FAISS
+
+from langchain_community.embeddings import HuggingFaceEmbeddings
 
 
-def create_faiss_index(embeddings):
-
-    dimension = embeddings.shape[1]
-
-    index = faiss.IndexFlatL2(dimension)
-
-    index.add(np.array(embeddings))
-
-    return index
+embedding_model = HuggingFaceEmbeddings(
+    model_name="sentence-transformers/all-MiniLM-L6-v2"
+)
 
 
-def search_index(query_embedding, index, k=5):
+def create_vectorstore(documents):
 
-    distances, indices = index.search(
-        np.array([query_embedding]),
-        k
+    splitter = RecursiveCharacterTextSplitter(
+        chunk_size=1000,
+        chunk_overlap=200
     )
 
-    return indices[0]
+    chunks = splitter.split_documents(documents)
+
+    vectorstore = FAISS.from_documents(
+        chunks,
+        embedding_model
+    )
+
+    return vectorstore, chunks
