@@ -1,92 +1,226 @@
 import streamlit as st
-import google.generativeai as genai
-import os
 
-from dotenv import load_dotenv
+from utils.loader import load_pdf
 
-from utils.pdf_processing import extract_text_from_pdf
-from utils.chunking import chunk_text
-from utils.embeddings import create_embeddings, model
-from utils.vector_store import create_faiss_index, search_index
-from utils.rag_pipeline import generate_answer, generate_summary
+from utils.vectorstore import create_vectorstore
 
+from utils.reranker import rerank_documents
 
-load_dotenv()
+from utils.helpers import format_context
 
-genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
+from utils.chains import get_gemini_response
+
+from utils.prompts import (
+    QA_PROMPT,
+    SUMMARY_PROMPT
+)
+
+from utils.sections import extract_sections
 
 
 st.set_page_config(
-    page_title="Research Paper Assistant",
+    page_title="AI Research Paper Assistant",
     page_icon="📚",
     layout="wide"
 )
 
 
+# =========================
+# SIDEBAR
+# =========================
+
+with st.sidebar:
+
+    st.title("⚙️ Settings")
+
+    api_key = st.text_input(
+        "Enter Gemini API Key",
+        type="password"
+    )
+
+    st.markdown("---")
+
+    st.markdown("### Features")
+
+    st.markdown("""
+    ✅ Multi-PDF Chat  
+    ✅ Research Summaries  
+    ✅ Methodology Extraction  
+    ✅ Semantic Search  
+    ✅ Citation Answers  
+    ✅ Reranking  
+    ✅ Literature Review Notes  
+    """)
+
+    st.markdown("---")
+
+    st.markdown(
+        "Built using LangChain + Gemini + FAISS"
+    )
+
+
+# =========================
+# MAIN UI
+# =========================
+
 st.title("📚 AI Research Paper Assistant")
 
-st.markdown(
-    "Upload a research paper and chat with it using AI."
+st.markdown("""
+Upload research papers and interact with them using AI-powered semantic search and RAG.
+""")
+
+
+uploaded_files = st.file_uploader(
+    "Upload Research Papers",
+    type=["pdf"],
+    accept_multiple_files=True
 )
 
 
-uploaded_pdf = st.file_uploader(
-    "Upload Research Paper",
-    type=["pdf"]
-)
+if uploaded_files and api_key:
+
+    all_docs = []
+
+    with st.spinner("Processing Research Papers..."):
+
+        for pdf in uploaded_files:
+
+            docs = load_pdf(pdf)
+
+            all_docs.extend(docs)
+
+        vectorstore, chunks = create_vectorstore(all_docs)
+
+    st.success("Research Papers Processed Successfully!")
 
 
-if uploaded_pdf:
+    # =========================
+    # SUMMARY
+    # =========================
 
-    with st.spinner("Processing Research Paper..."):
+    if st.button("Generate Research Summary"):
 
-        text = extract_text_from_pdf(uploaded_pdf)
+        full_text = "\n".join(
+            [doc.page_content for doc in all_docs]
+        )
 
-        chunks = chunk_text(text)
+        summary_prompt = SUMMARY_PROMPT + full_text[:15000]
 
-        embeddings = create_embeddings(chunks)
+        summary = get_gemini_response(
+            api_key,
+            summary_prompt
+        )
 
-        index = create_faiss_index(embeddings)
+        st.subheader("📄 Research Summary")
 
-    st.success("Research Paper Processed Successfully!")
+        st.write(summary)
 
-    if st.button("Generate Paper Summary"):
 
-        with st.spinner("Generating Summary..."):
+    # =========================
+    # SECTION EXTRACTION
+    # =========================
 
-            summary = generate_summary(text[:10000])
+    if st.button("Extract Key Sections"):
 
-            st.subheader("Paper Summary")
+        full_text = "\n".join(
+            [doc.page_content for doc in all_docs]
+        )
 
-            st.write(summary)
+        sections = extract_sections(full_text)
 
-    question = st.text_input(
-        "Ask a question about the paper"
+        st.subheader("Abstract")
+        st.write(sections["abstract"])
+
+        st.subheader("Methodology")
+        st.write(sections["methodology"])
+
+        st.subheader("Conclusion")
+        st.write(sections["conclusion"])
+
+
+    # =========================
+    # LITERATURE REVIEW NOTES
+    # =========================
+
+    if st.button("Generate Literature Review Notes"):
+
+        full_text = "\n".join(
+            [doc.page_content for doc in all_docs]
+        )
+
+        prompt = f"""
+        Generate detailed literature review notes
+        from the following papers.
+
+        Include:
+        - themes
+        - methodologies
+        - findings
+        - research gaps
+        - comparisons
+
+        Papers:
+        {full_text[:15000]}
+        """
+
+        notes = get_gemini_response(
+            api_key,
+            prompt
+        )
+
+        st.subheader("📚 Literature Review Notes")
+
+        st.write(notes)
+
+
+    # =========================
+    # CHAT
+    # =========================
+
+    question = st.chat_input(
+        "Ask a research question..."
     )
 
     if question:
 
-        query_embedding = model.encode([question])
+        with st.chat_message("user"):
 
-        indices = search_index(
-            query_embedding,
-            index
+            st.write(question)
+
+        retrieved_docs = vectorstore.similarity_search(
+            question,
+            k=10
         )
 
-        retrieved_chunks = [
-            chunks[i]
-            for i in indices
-        ]
+        reranked_docs = rerank_documents(
+            question,
+            retrieved_docs
+        )
 
-        context = "\n".join(retrieved_chunks)
+        context = format_context(reranked_docs)
 
-        with st.spinner("Generating Answer..."):
+        final_prompt = QA_PROMPT.format(
+            context=context,
+            question=question
+        )
 
-            answer = generate_answer(
-                context,
-                question
-            )
+        with st.chat_message("assistant"):
 
-            st.subheader("Answer")
+            with st.spinner("Generating Response..."):
 
-            st.write(answer)
+                answer = get_gemini_response(
+                    api_key,
+                    final_prompt
+                )
+
+                st.write(answer)
+
+        # citations
+
+        with st.expander("View Retrieved Chunks"):
+
+            for i, doc in enumerate(reranked_docs):
+
+                st.markdown(f"### Citation {i+1}")
+
+                st.write(doc.page_content[:1000])
