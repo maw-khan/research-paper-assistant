@@ -62,7 +62,7 @@ Built with a clean and interactive **Streamlit UI**.
 
 # 🏗️ System Architecture
 
-![Architecture](images/architecture.png)
+![Architecture](images/Architecture.png)
 
 ---
 
