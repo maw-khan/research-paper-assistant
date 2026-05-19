@@ -6,6 +6,10 @@ from utils.prompts import (
 )
 
 
+from google import genai
+import streamlit as st
+
+
 def get_gemini_response(api_key, prompt):
 
     try:
@@ -19,20 +23,48 @@ def get_gemini_response(api_key, prompt):
 
         return response.text
 
+    # =========================
+    # QUOTA EXCEEDED (429)
+    # =========================
+
     except Exception as e:
 
         error_message = str(e)
 
-        # Gemini overloaded
-        if "503" in error_message or "high demand" in error_message.lower():
+        # Free tier quota exceeded
+        if "429" in error_message or "RESOURCE_EXHAUSTED" in error_message:
 
-            return (
-                "⚠️ Gemini API is currently experiencing high demand.\n\n"
-                "Please wait a few moments and try again."
+            st.warning(
+                "⚠️ Gemini free-tier quota exceeded. "
+                "Please wait a while or try again later."
             )
 
-        # Generic error
-        return (
-            "⚠️ Unable to generate response right now.\n\n"
-            "Please try again later."
-        )
+            return None
+
+        # High demand / overloaded servers
+        elif "503" in error_message or "UNAVAILABLE" in error_message:
+
+            st.warning(
+                "⚠️ Gemini servers are currently busy. "
+                "Please retry in a few moments."
+            )
+
+            return None
+
+        # Invalid API key
+        elif "API key not valid" in error_message:
+
+            st.warning(
+                "⚠️ Invalid Gemini API key."
+            )
+
+            return None
+
+        # Generic fallback
+        else:
+
+            st.warning(
+                "⚠️ An unexpected Gemini API error occurred."
+            )
+
+            return None
