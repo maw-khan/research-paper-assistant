@@ -1,6 +1,6 @@
-# Context-Aware RAG Chatbot (PDF Q&A with Gemini AI)
+# AI Research Paper Assistant (Multi-PDF RAG System with Gemini AI)
 
-![Python](https://img.shields.io/badge/Python-3.11-blue.svg)
+![Python](https://img.shields.io/badge/Python-3.10+-blue.svg)
 ![Streamlit](https://img.shields.io/badge/Streamlit-App-red.svg)
 ![LangChain](https://img.shields.io/badge/LangChain-RAG-green.svg)
 ![Google Gemini](https://img.shields.io/badge/LLM-Gemini%202.5-blueviolet.svg)
@@ -9,141 +9,276 @@
 
 ---
 
+## 🚀 Live Demo
+
 Deployed App Link:
-https://pdfcantalk.streamlit.app/
+https://chatwithresearchpaper.streamlit.app/
 
 ---
 
-## 📌 Overview
+# 📌 Overview
 
-This project is a **Retrieval-Augmented Generation (RAG) based AI chatbot** that allows users to upload PDF documents and interact with them using natural language queries.
+The **AI Research Paper Assistant** is an advanced **multi-document Retrieval-Augmented Generation (RAG) application** designed specifically for research and academic workflows.
 
-The system retrieves relevant context from uploaded documents and uses **Google Gemini AI** to generate accurate, context-aware responses with source citations.
+This system allows users to upload multiple research papers in PDF format and interact with them using natural language queries powered by **Google Gemini AI**.
 
-It is built using **Streamlit + LangChain + FAISS + Gemini Embeddings**.
+Unlike basic PDF chatbots, this application includes:
 
----
+* 📚 Research paper summarization
+* 💬 Literature review generation
+* 📚 Methodology extraction
+* 🔎 Semantic retrieval
+* 📄 Key section extraction
+* ⚡ Reranking for improved retrieval quality
 
-![Homepage](images/homepage.png)
+The application combines **LangChain + Gemini AI + FAISS + Cross-Encoder Reranking** to create a professional-grade academic assistant capable of understanding and analyzing complex research documents.
 
----
-
-## 🚀 Features
-
-- 📄 Upload multiple PDF files
-- 📦 AI-powered document understanding (RAG pipeline)
-- 🔎 Semantic search using FAISS vector database
-- 💬 Conversational chatbot interface
-- 📚 Source citations with expandable references
-- ⚡ Powered by Google Gemini (`gemini-2.5-flash`)
-- 💾 Conversation memory support
-- 💡 Clean and interactive Streamlit UI
-- 🔐 API key input via sidebar (no hardcoding)
+Built with a clean and interactive **Streamlit UI**.
 
 ---
 
-## System Architecture
-
-![Architecture](images/Architecture.png) 
+![Homepage](images/Homepage.png)
 
 ---
 
-## Tech Stack
+# 🚀 Features
 
-| Component        | Technology |
-|----------------|-----------|
-| Frontend       | Streamlit |
-| LLM            | Google Gemini (`gemini-2.5-flash`) |
-| Embeddings     | `gemini-embedding-001` |
-| Framework      | LangChain |
-| Vector DB      | FAISS |
-| PDF Processing  | PyMuPDF (`fitz`) |
-| Language       | Python (3.11) |
+* 📄 Upload and analyze multiple research papers
+* ⚡ AI-generated research summaries
+* 📚 Literature review notes generation
+* 💡 Automatic methodology extraction
+* 📑 Abstract, methodology, and conclusion extraction
+* 🔎 Semantic similarity search using FAISS
+* 🎯 Cross-encoder reranking for improved context retrieval
+* 💬 Conversational research paper chatbot
+* 📚 Expandable retrieved citation chunks
+* ⚡ Powered by Google Gemini (`gemini-2.5-flash`)
+* 🔐 Secure API key input through sidebar
+* 💡 Clean and responsive Streamlit UI
+* ⚠️ Graceful handling of Gemini API quota/server errors
+* ⏳ Real-time processing spinners and status updates
 
 ---
 
-## 📦 Installation
+# 🏗️ System Architecture
 
-### 1️⃣ Clone Repository
+![Architecture](images/architecture.png)
+
+---
+
+# 🛠️ Tech Stack
+
+| Component       | Technology                         |
+| --------------- | ---------------------------------- |
+| Frontend        | Streamlit                          |
+| LLM             | Google Gemini (`gemini-2.5-flash`) |
+| Embeddings      | `gemini-embedding-001`             |
+| Framework       | LangChain                          |
+| Vector Database | FAISS                              |
+| Reranking       | SentenceTransformers Cross-Encoder |
+| PDF Processing  | PyMuPDF (`fitz`)                   |
+| Language        | Python                      |
+
+---
+
+# 📂 Project Structure
+
 ```bash
-git clone https://github.com/maw-khan/context-aware-rag-chatbot-gemini.git
+AI-Research-Paper-Assistant/
+│
+├── app.py
+├── requirements.txt
+├── README.md
+│
+├── utils/
+│   ├── chains.py
+│   ├── helpers.py
+│   ├── loader.py
+│   ├── prompts.py
+│   ├── reranker.py
+│   ├── sections.py
+│   └── vectorstore.py
+│
+├── images/
+│   ├── homepage.png
+│   ├── architecture.png
+│   └── chat_example.png
+│
+└── data/
+```
+
+---
+
+# 📦 Installation
+
+## 1️⃣ Clone Repository
+
+```bash
+git clone https://github.com/maw-khan/research-paper-assistant.git
+```
+
+---
+
+## 2️⃣ Install Requirements
+
+```bash
 pip install -r requirements.txt
 ```
 
 ---
 
-🔑 API Key Setup
-You need a Google Gemini API Key.
-Get it from:
+# 🔑 API Key Setup
+
+This project requires a **Google Gemini API Key**.
+
+Get your API key from:
+
 👉 https://ai.google.dev/
-No need for .env file — the app accepts it directly via Streamlit sidebar.
 
-![API Required](images/api_required.png)
+The application securely accepts the API key directly through the Streamlit sidebar.
 
----
-
-▶️ Run the Deployed App (Link):
-
-https://pdfcantalk.streamlit.app/
+No `.env` configuration required.
 
 ---
 
-## 💡 How to Use
-1. Enter your Gemini API Key in the sidebar
-2. Upload one or more PDF files
-3. Click “Process PDFs”
-4. Wait for indexing to complete
-5. Start asking questions in the chat box
-6. View answers + expandable source references
-
-Example Use Cases
-- Research paper Q&A
-- Study notes assistant
-- Legal document analysis
-- Business report summarization
-- Book understanding chatbot
-
-📚 Example Query
-“What is the main conclusion of the document?”
-The chatbot will:
-- Retrieve relevant chunks
-- Generate an answer using Gemini
-- Show source excerpts used for reasoning
-  
-![Chat Example](images/chat_example.png)
+![API Required](images/example1.png)
 
 ---
 
-## ⚙️ Key Components Explained
-🔹 Chunking
-Uses RecursiveCharacterTextSplitter to split documents into overlapping chunks for better retrieval accuracy.
+# ▶️ Run the Application
 
-🔹 Vector Search
-FAISS is used for fast similarity search across embeddings.
+## Local Run
 
-🔹 Memory
-ConversationBufferMemory maintains chat context across multiple queries.
-
-🔹 RAG Chain
-ConversationalRetrievalChain combines retrieval + LLM generation.
+```bash
+streamlit run app.py
+```
 
 ---
 
-## 🔮 Future Improvements
-- 📌 Add document upload history
-- 🔐 Add user authentication
-- 📊 Add analytics dashboard
-- 💾 Save chat sessions permanently
+## Run Deployed Version
+
+https://chatwithresearchpaper.streamlit.app/
 
 ---
 
-## ⚠️ Limitations
-- Large PDFs may take time to process
-- Requires valid Gemini API key
-- Works best with text-based PDFs (not scanned images)
+# 💡 How to Use
+
+1. Enter your Gemini API key in the sidebar
+2. Upload one or multiple research papers
+3. Wait for vector indexing to complete
+4. Use available research tools:
+   * Generate Research Summary
+   * Extract Key Sections
+   * Generate Literature Review Notes
+6. Ask research questions in the chat interface
+7. View retrieved citation chunks for transparency
 
 ---
 
-## 👨‍💻 Author
+# 📚 Example Use Cases
+
+* Research paper analysis
+* Literature review generation
+* Thesis support assistant
+* Academic note generation
+* Scientific methodology extraction
+* Multi-paper comparison
+* Research Q&A assistant
+
+---
+
+# 💬 Example Query
+
+### User Question:
+
+> “What methodologies were commonly used across these papers?”
+
+The assistant will:
+
+* Retrieve relevant semantic chunks
+* Rerank retrieved passages
+* Generate a context-aware response using Gemini AI
+* Display supporting retrieved citations
+
+---
+
+![Chat Example](images/example2.png)
+
+---
+
+# ⚙️ Key Components Explained
+
+## 🔹 Multi-PDF Processing
+
+Multiple research papers are processed simultaneously and merged into a unified searchable knowledge base.
+
+---
+
+## 🔹 Semantic Chunking
+
+Documents are split into overlapping chunks for improved retrieval quality and context preservation.
+
+---
+
+## 🔹 Vector Search
+
+FAISS vector database enables fast semantic similarity search over document embeddings.
+
+---
+
+## 🔹 Cross-Encoder Reranking
+
+Retrieved chunks are reranked using transformer-based reranking models to improve answer relevance.
+
+---
+
+## 🔹 Research-Oriented Prompting
+
+Custom prompt engineering is used for:
+
+* Literature review generation
+* Research summaries
+* Methodology extraction
+* Academic-style responses
+
+---
+
+## 🔹 Gemini API Error Handling
+
+The application gracefully handles:
+
+* Rate limits
+* Quota exhaustion
+* Temporary server overload
+* Invalid API keys
+
+without exposing technical tracebacks to users.
+
+---
+
+# 🔮 Future Improvements
+
+* 📌 Research paper citation export
+* 📄 PDF report generation
+* 🔮 Persistent conversational memory
+* 🔍 Advanced filtering and search
+* 📌 arXiv paper integration
+* 📄 Multi-user authentication
+* ☁️ Cloud vector database integration
+
+---
+
+# ⚠️ Limitations
+
+* Large PDF collections may require longer processing time
+* Requires valid Gemini API access
+* Works best with text-based PDFs
+* Free Gemini API tier has request limitations
+
+---
+
+# 👨‍💻 Author
+
 Muhammad Ali Waris Khan
-- AI / ML Enthusiast | Building RAG Systems & LLM Applications
+
+AI/ML Enthusiast | RAG Systems | LLM Applications | Generative AI Developer
