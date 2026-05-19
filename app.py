@@ -33,11 +33,35 @@ with st.sidebar:
 
     st.title("⚙️ Settings")
 
-    api_key = st.text_input(
-        "Enter Gemini API Key",
-        type="password"
-    )
-
+    api_key = st.sidebar.text_input(
+    "Enter Gemini API Key",
+    type="password",
+    help="Enter your Google Gemini API key"
+        )
+        
+        # Validate API Key
+        api_valid = False
+        
+        if api_key:
+            try:
+                from google import genai
+        
+                test_client = genai.Client(api_key=api_key)
+        
+                # Small test request
+                test_client.models.generate_content(
+                    model="gemini-2.0-flash",
+                    contents="Hello"
+                )
+        
+                api_valid = True
+                st.sidebar.success("✅ Valid Gemini API Key")
+        
+            except Exception:
+                st.sidebar.error("❌ Invalid API Key")
+                api_valid = False
+        else:
+            st.sidebar.warning("⚠️ Please enter your Gemini API Key")
     st.markdown("---")
 
     st.markdown("### Features")
