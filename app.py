@@ -119,82 +119,116 @@ if uploaded_files and api_key:
 
 
     # =========================
+    # ACTION BUTTONS
+    # =========================
+
+    col1, col2, col3 = st.columns(3)
+
+    with col1:
+
+        summary_btn = st.button(
+            "📄 Generate Summary",
+            use_container_width=True
+        )
+
+    with col2:
+
+        sections_btn = st.button(
+            "🔑 Extract Sections",
+            use_container_width=True
+        )
+
+    with col3:
+
+        literature_btn = st.button(
+            "📚 Literature Review",
+            use_container_width=True
+        )
+
+
+    # =========================
     # SUMMARY
     # =========================
 
-    if st.button("Generate Research Summary"):
+    if summary_btn:
 
-        full_text = "\n".join(
-            [doc.page_content for doc in all_docs]
-        )
+        with st.spinner("Generating research summary..."):
 
-        summary_prompt = SUMMARY_PROMPT + full_text[:15000]
+            full_text = "\n".join(
+                [doc.page_content for doc in all_docs]
+            )
 
-        summary = get_gemini_response(
-            api_key,
-            summary_prompt
-        )
+            summary_prompt = SUMMARY_PROMPT + full_text[:15000]
 
-        st.subheader("📄 Research Summary")
+            summary = get_gemini_response(
+                api_key,
+                summary_prompt
+            )
 
-        st.write(summary)
+            st.subheader("📄 Research Summary")
+
+            st.write(summary)
 
 
     # =========================
     # SECTION EXTRACTION
     # =========================
 
-    if st.button("Extract Key Sections"):
+    if sections_btn:
 
-        full_text = "\n".join(
-            [doc.page_content for doc in all_docs]
-        )
+        with st.spinner("Extracting key sections..."):
 
-        sections = extract_sections(full_text)
+            full_text = "\n".join(
+                [doc.page_content for doc in all_docs]
+            )
 
-        st.subheader("Abstract")
-        st.write(sections["abstract"])
+            sections = extract_sections(full_text)
 
-        st.subheader("Methodology")
-        st.write(sections["methodology"])
+            st.subheader("Abstract")
+            st.write(sections["abstract"])
 
-        st.subheader("Conclusion")
-        st.write(sections["conclusion"])
+            st.subheader("Methodology")
+            st.write(sections["methodology"])
+
+            st.subheader("Conclusion")
+            st.write(sections["conclusion"])
 
 
     # =========================
     # LITERATURE REVIEW NOTES
     # =========================
 
-    if st.button("Generate Literature Review Notes"):
+    if literature_btn:
 
-        full_text = "\n".join(
-            [doc.page_content for doc in all_docs]
-        )
+        with st.spinner("Generating literature review notes..."):
 
-        prompt = f"""
-        Generate detailed literature review notes
-        from the following papers.
+            full_text = "\n".join(
+                [doc.page_content for doc in all_docs]
+            )
 
-        Include:
-        - themes
-        - methodologies
-        - findings
-        - research gaps
-        - comparisons
+            prompt = f"""
+            Generate detailed literature review notes
+            from the following papers.
 
-        Papers:
-        {full_text[:15000]}
-        """
+            Include:
+            - themes
+            - methodologies
+            - findings
+            - research gaps
+            - comparisons
 
-        notes = get_gemini_response(
-            api_key,
-            prompt
-        )
+            Papers:
+            {full_text[:15000]}
+            """
 
-        st.subheader("📚 Literature Review Notes")
+            notes = get_gemini_response(
+                api_key,
+                prompt
+            )
 
-        st.write(notes)
+            st.subheader("📚 Literature Review Notes")
+
+            st.write(notes)
 
 
     # =========================
