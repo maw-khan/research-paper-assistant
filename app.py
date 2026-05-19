@@ -37,31 +37,31 @@ with st.sidebar:
     "Enter Gemini API Key",
     type="password",
     help="Enter your Google Gemini API key"
-        )
+    )
         
-        # Validate API Key
-        api_valid = False
+    # Validate API Key
+    api_valid = False
         
-        if api_key:
-            try:
-                from google import genai
+    if api_key:
+        try:
+            from google import genai
         
-                test_client = genai.Client(api_key=api_key)
+            test_client = genai.Client(api_key=api_key)
         
-                # Small test request
-                test_client.models.generate_content(
-                    model="gemini-2.0-flash",
-                    contents="Hello"
-                )
+            # Small test request
+            test_client.models.generate_content(
+                model="gemini-2.5-flash",
+                contents="Hello"
+            )
         
-                api_valid = True
-                st.sidebar.success("✅ Valid Gemini API Key")
+            api_valid = True
+            st.sidebar.success("✅ Valid Gemini API Key")
         
-            except Exception:
-                st.sidebar.error("❌ Invalid API Key")
-                api_valid = False
-        else:
-            st.sidebar.warning("⚠️ Please enter your Gemini API Key")
+        except Exception:
+            st.sidebar.error("❌ Invalid API Key")
+            api_valid = False
+    else:
+        st.sidebar.warning("⚠️ Please enter your Gemini API Key")
     st.markdown("---")
 
     st.markdown("### Features")
