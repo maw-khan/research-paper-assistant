@@ -40,28 +40,51 @@ with st.sidebar:
     )
         
     # Validate API Key
-    api_valid = False
-        
+    # Session state for API validation
+    if "api_valid" not in st.session_state:
+        st.session_state.api_valid = False
+    
+    if "validated_key" not in st.session_state:
+        st.session_state.validated_key = ""
+    
+    
     if api_key:
-        try:
-            from google import genai
-        
-            test_client = genai.Client(api_key=api_key)
-        
-            # Small test request
-            test_client.models.generate_content(
-                model="gemini-2.5-flash",
-                contents="Hello"
-            )
-        
-            api_valid = True
+    
+        # Only validate if key changed
+        if api_key != st.session_state.validated_key:
+    
+            try:
+                from google import genai
+    
+                test_client = genai.Client(api_key=api_key)
+    
+                # Small validation request
+                test_client.models.generate_content(
+                    model="gemini-2.5-flash",
+                    contents="Hello"
+                )
+    
+                st.session_state.api_valid = True
+                st.session_state.validated_key = api_key
+    
+            except Exception:
+    
+                st.session_state.api_valid = False
+    
+        # Display stable validation state
+        if st.session_state.api_valid:
+    
             st.sidebar.success("✅ Valid Gemini API Key")
-        
-        except Exception:
-            st.sidebar.error("❌ Invalid API Key")
-            api_valid = False
+    
+        else:
+    
+            st.sidebar.error("❌ Invalid Gemini API Key")
+    
     else:
+    
         st.sidebar.warning("⚠️ Please enter your Gemini API Key")
+
+    
     st.markdown("---")
 
     st.markdown("### Features")
@@ -101,7 +124,7 @@ uploaded_files = st.file_uploader(
 )
 
 
-if uploaded_files and api_key:
+if uploaded_files and st.session_state.api_valid:
 
     all_docs = []
 
